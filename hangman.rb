@@ -52,7 +52,7 @@ class Game
       self.display_word
       puts "You have #{num_guesses_left} guesses left."
       puts 'Guess a letter:'
-      letter = gets.chomp.to_s
+      letter = gets.chomp.downcase
       if letter.length != 1
         puts 'Type only one letter.'
       else
