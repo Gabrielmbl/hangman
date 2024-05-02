@@ -1,9 +1,27 @@
 class Game
-  attr_accessor :words, :word_selected
+  attr_accessor :words, :word_selected, :indexes_discovered
 
   def initialize
     @words = load_words('google-10000-english-no-swears.txt')
     @word_selected = random_word(@words)
+    @indexes_discovered = []
+  end
+
+  def guess(letter)
+    @word_selected.each_char.with_index do |character, index|
+      indexes_discovered << index if character == letter
+    end
+    @indexes_discovered
+  end
+
+  def display_word
+    @word_selected.each_char.with_index do |character, index|
+      if @indexes_discovered.include?(index)
+        print character
+      else
+        print "_ "
+      end
+    end
   end
 end
 
