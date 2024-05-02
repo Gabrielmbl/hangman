@@ -48,7 +48,9 @@ class Game
 
   def start
     until @num_guesses == 10 || self.check_win
+      num_guesses_left = 10 - @num_guesses
       self.display_word
+      puts "You have #{num_guesses_left} guesses left."
       puts 'Guess a letter:'
       letter = gets.chomp.to_s
       if letter.length != 1
