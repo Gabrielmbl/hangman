@@ -71,15 +71,15 @@ class Game
   def menu
     puts "Welcome to Hangman!"
     puts "Would you like to start a new game or open a saved game?"
-    puts "Type 'new' to start a new game or 'open' to open a saved game."
+    puts "Type 'play' to play a game or 'open' to open a saved game."
     
     input = gets.chomp.downcase
-    if input == 'new'
+    if input == 'play'
       start
     elsif input == 'open'
       open_saved_game
     else
-      puts "Invalid input. Please type 'new' or 'open'."
+      puts "Invalid input. Please type 'play' or 'open'."
       menu
     end
   end
@@ -102,11 +102,14 @@ class Game
       display_word
       puts "You have #{num_guesses_left} guesses left."
       puts "You have guessed: #{@letters_guessed}."
-      puts 'Type "save" to save the game, or guess a letter:'
+      puts 'Type "save" to save the game, "exit" to leave, or guess a letter:'
       input = gets.chomp.downcase
       if input == 'save'
         save_game('saved_game.yaml')
         puts 'Game saved. Continue guessing.'
+      elsif input == 'exit'
+        puts 'See you later!'
+        menu
       elsif input.length != 1
         puts 'Type only one letter.'
       else
