@@ -8,13 +8,14 @@ class Hangman
 end
 
 class Game
-  attr_accessor :word_selected, :indexes_discovered, :num_guesses
+  attr_accessor :word_selected, :indexes_discovered, :num_guesses, :letters_guessed
 
   def initialize
     @hangman = Hangman.new
     @word_selected = random_word(@hangman.words)
     @indexes_discovered = []
     @num_guesses = 0
+    @letters_guessed = []
   end
 
   def guess(letter)
@@ -24,6 +25,7 @@ class Game
       end
     end
     @num_guesses += 1
+    @letters_guessed << letter
   end
 
   def check_win
@@ -51,6 +53,7 @@ class Game
       num_guesses_left = 10 - @num_guesses
       self.display_word
       puts "You have #{num_guesses_left} guesses left."
+      puts "You have guessed: #{@letters_guessed}."
       puts 'Guess a letter:'
       letter = gets.chomp.downcase
       if letter.length != 1
