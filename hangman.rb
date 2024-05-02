@@ -1,10 +1,11 @@
+require 'yaml'
+
 class Hangman
   attr_accessor :words
 
   def initialize
     @words = load_words('google-10000-english-no-swears.txt')
   end
-  
 end
 
 class Game
@@ -18,11 +19,30 @@ class Game
     @letters_guessed = []
   end
 
+  def save_game(file_name)
+    game_state = {
+      word_selected: @word_selected,
+      indexes_discovered: @indexes_discovered,
+      num_guesses: @num_guesses,
+      letters_guessed: @letters_guessed
+    }
+    File.open(file_name, 'w') { |file| file.write(game_state.to_yaml) }
+    puts 'Game saved successfully.'
+  end
+
+  def self.load_game(file_name)
+    game_state = YAML.load_file(file_name)
+    game = Game.new
+    game.word_selected = game_state[:word_selected]
+    game.indexes_discovered = game_state[:indexes_discovered]
+    game.num_guesses = game_state[:num_guesses]
+    game.letters_guessed = game_state[:letters_guessed]
+    game
+  end
+
   def guess(letter)
     @word_selected.each_char.with_index do |character, index|
-      if character == letter
-        @indexes_discovered << index unless @indexes_discovered.include?(index)
-      end
+      @indexes_discovered << index if character == letter && !@indexes_discovered.include?(index)
     end
     @num_guesses += 1
     @letters_guessed << letter
@@ -32,7 +52,7 @@ class Game
     if @indexes_discovered.length == @word_selected.length and @num_guesses <= 10
       true
     elsif @num_guesses == 10
-      puts "You used all your 10 guesses. Game is over, try again!"
+      puts 'You used all your 10 guesses. Game is over, try again!'
       false
     end
   end
@@ -42,31 +62,62 @@ class Game
       if @indexes_discovered.include?(index)
         print character
       else
-        print "_ "
+        print '_ '
       end
     end
     print "\n"
   end
 
+  def menu
+    puts "Welcome to Hangman!"
+    puts "Would you like to start a new game or open a saved game?"
+    puts "Type 'new' to start a new game or 'open' to open a saved game."
+    
+    input = gets.chomp.downcase
+    if input == 'new'
+      start
+    elsif input == 'open'
+      open_saved_game
+    else
+      puts "Invalid input. Please type 'new' or 'open'."
+      menu
+    end
+  end
+
+  def open_saved_game
+    puts "Enter the file name of the saved game:"
+    file_name = gets.chomp
+    if File.exist?(file_name)
+      loaded_game = Game.load_game(file_name)
+      loaded_game.menu
+    else
+      puts "File not found. Please enter a valid file name."
+      open_saved_game
+    end
+  end
+
   def start
-    until @num_guesses == 10 || self.check_win
+    until @num_guesses == 10 || check_win
       num_guesses_left = 10 - @num_guesses
-      self.display_word
+      display_word
       puts "You have #{num_guesses_left} guesses left."
       puts "You have guessed: #{@letters_guessed}."
-      puts 'Guess a letter:'
-      letter = gets.chomp.downcase
-      if letter.length != 1
+      puts 'Type "save" to save the game, or guess a letter:'
+      input = gets.chomp.downcase
+      if input == 'save'
+        save_game('saved_game.yaml')
+        puts 'Game saved. Continue guessing.'
+      elsif input.length != 1
         puts 'Type only one letter.'
       else
-        self.guess(letter)
+        guess(input)
       end
     end
-    
-    self.display_word
-    if self.check_win
-      puts "Congratulations! You guessed the word `#{@word_selected}` correctly."
-    end
+
+    display_word
+    return unless check_win
+
+    puts "Congratulations! You guessed the word `#{@word_selected}` correctly."
   end
 end
 
@@ -84,5 +135,3 @@ def random_word(words)
   filtered_words = words.select { |word| word.length >= 5 && word.length <= 12 }
   filtered_words.sample
 end
-
-
